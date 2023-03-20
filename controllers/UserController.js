@@ -33,9 +33,9 @@ export const register = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      message: "Не удалось зарегистрироваться",
-    });
+    // res.status(500).json({
+    //   message: "Не удалось зарегистрироваться",
+    // });
   }
 };
 
@@ -70,9 +70,9 @@ export const login = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      message: "Не удалось авторизоваться",
-    });
+    // res.status(500).json({
+    //   message: "Не удалось авторизоваться",
+    // });
   }
 };
 

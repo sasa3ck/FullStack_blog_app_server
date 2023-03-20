@@ -26,21 +26,23 @@ export const getOne = async (req, res) => {
       {
         returnDocument: "after",
       }
-    ).then((doc, err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          message: "Не удалось вернуть статью",
-        });
-      }
+    )
+      .populate("user")
+      .then((doc, err) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({
+            message: "Не удалось вернуть статью",
+          });
+        }
 
-      if (!doc) {
-        return res.status(404).json({
-          message: "Статья не найдена",
-        });
-      }
-      res.json(doc);
-    });
+        if (!doc) {
+          return res.status(404).json({
+            message: "Статья не найдена",
+          });
+        }
+        res.json(doc);
+      });
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -54,7 +56,7 @@ export const create = async (req, res) => {
     const doc = new PostModal({
       title: req.body.title,
       text: req.body.text,
-      tags: req.body.tags,
+      tags: req.body.tags.split(","),
       imageUrl: req.body.imageUrl,
       user: req.userId,
     });
@@ -63,15 +65,16 @@ export const create = async (req, res) => {
     res.json(post);
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      message: "Не удалось создать статью",
-    });
+    // res.status(500).json({
+    //   message: "Не удалось создать статью",
+    // });
   }
 };
 
 export const update = async (req, res) => {
   try {
     const postId = req.params.id;
+    const tag = req.body.tags.split(',')
 
     await PostModal.updateOne(
       {
@@ -80,16 +83,17 @@ export const update = async (req, res) => {
       {
         title: req.body.title,
         text: req.body.text,
-        tags: req.body.tags,
         imageUrl: req.body.imageUrl,
         user: req.userId,
+        tags: tag,
       }
-    ).then(res.json({ success: true }));
+    ).then(() => {
+      res.json({
+        success: true,
+      });
+    });
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      message: "Не удалось обновить статью",
-    });
   }
 };
 
@@ -121,6 +125,23 @@ export const remove = async (req, res) => {
     console.log(err);
     res.status(500).json({
       message: "Не удалось удалить статью",
+    });
+  }
+};
+
+export const getLastTags = async (req, res) => {
+  try {
+    const posts = await PostModal.find().limit(5).exec();
+    const tags = posts
+      .map((obj) => obj.tags)
+      .flat()
+      .slice(0, 5);
+
+    res.json(tags);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Не удалось получить статьи",
     });
   }
 };
